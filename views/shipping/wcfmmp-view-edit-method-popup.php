@@ -322,6 +322,168 @@
           <?php } ?>
           
         </div>
+
+		<div class="shipping_form" id="weight-class-shipping">
+          	<?php
+					$WCFM->wcfm_fields->wcfm_generate_form_field ( 
+						apply_filters( 'wcfmmp_shipping_zone_title_fields',
+										array(
+											"method_title_wcs" => array(
+												'label' => __('Titulo Metodo de Envio', 'wc-multivendor-marketplace'), 
+												'name' => 'method_title',
+												'type' => 'text', 
+												'class' => 'wcfm-text wcfm_ele', 
+												'label_class' => 'wcfm_title wcfm_ele', 
+												'placeholder' => __('Enter method title', 'wc-multivendor-marketplace'),
+												'value' => ''  
+											)
+										)
+									)
+					);
+          		?>
+
+				<div class="wrapper_weight_rules" id="weight-class-shipping-rules">
+					<p class="method_title_fr wcfm_title wcfm_ele">
+						<strong>
+							<?php _e('Portes por peso (g)', 'wc-multivendor-marketplace'); ?>
+						</strong>
+					</p>
+					<div id="wrapper-weight-rules-content">
+						<div class="wrapper_weight_rules wrapper_weight_rules_fields" id="weight-class-shipping-rules">
+							<div class="wrapper_weight_rules_min" id="weight-class-shipping-rules_min">
+								<label>
+									<?php _e("De", 'wc-multivendor-marketplace'); ?>
+								</label>
+								<input 
+								type="text" 
+								class="wcfm-text wcfm_ele weight-class-shipping-rules-min" 
+								name="weight-class-shipping-rules_min" 
+								id="weight-class-shipping-rules_min" 
+								placeholder="<?php _e('Peso minimo', 'wc-multivendor-marketplace'); ?>" 
+								value="<?php echo isset($weight_rules[$i]['min']) ? $weight_rules[$i]['min'] : ''; ?>"
+								/>
+							</div>
+							<div class="wrapper_weight_rules_max" id="weight-class-shipping-rules_max">
+								<label>
+									<?php _e("Até", 'wc-multivendor-marketplace'); ?>
+								</label>
+								<input 
+								type="text" 
+								class="wcfm-text wcfm_ele weight-class-shipping-rules-max" 
+								name="weight-class-shipping-rules_max" 
+								id="weight-class-shipping-rules_max" 
+								placeholder="<?php _e('Peso máximo', 'wc-multivendor-marketplace'); ?>" 
+								value="<?php echo isset($weight_rules[$i]['max']) ? $weight_rules[$i]['max'] : ''; ?>"
+								/>
+							</div>
+							<div class="wrapper_weight_rules_price" id="weight-class-shipping-rules_price">
+								<label>
+									<?php _e("Preço", 'wc-multivendor-marketplace'); ?>
+								</label>
+								<input 
+								type="text" 
+								class="wcfm-text wcfm_ele weight-class-shipping-rules-price" 
+								name="weight-class-shipping-rules_price" 
+								id="weight-class-shipping-rules_price" 
+								placeholder="<?php _e('Preço', 'wc-multivendor-marketplace'); ?>" 
+								value="<?php echo isset($weight_rules[$i]['price']) ? $weight_rules[$i]['price'] : ''; ?>"
+								/>
+							</div>
+							<div class="shipping_weight_action_buttons" id="shipping_weight_action_buttons">
+								<button class="wcfm_btn wcfm_btn-theme wcfm_btn-add-weight-class" id="add_weight_class">
+									<span>
+										<i class="wcfmfa fa-plus"></i>
+									</span>
+								</button>
+								<button class="wcfm_btn wcfm_btn-theme wcfm_btn-remove-weight-class" id="remove_weight_class">
+									<span>
+										<i class="wcfmfa fa-minus"></i>
+									</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="wrapper_shipping_classes" id="shipping_classes">
+					<p class="method_title_fr wcfm_title wcfm_ele">
+						<strong>
+							<?php _e('Portes por classe de envio', 'wc-multivendor-marketplace'); ?>
+						</strong>
+					</p>
+					<div id="wrapper-shipping-classes-content">
+						<div class="shipping_classes_item">
+							<div class="wrapper_shipping_classes_options" id="shipping_classes_options">
+								<label>
+									<?php _e("Classe de envio", 'wc-multivendor-marketplace'); ?>
+								</label>
+								<select 
+									class="wcfm-select wcfm_ele shipping_classes_select" 
+									name="shipping_classes_select" 
+									id="shipping_classes_select" 
+									>
+									<option value=""><?php _e('Selecione uma classe de envio', 'wc-multivendor-marketplace'); ?></option>
+									<?php
+
+									/*
+										Stole from: /wc-frontend-manager/views/products-manager/wcfm-view-products-manage.php:365
+									*/
+
+									$current_user_id = apply_filters( 'wcfm_current_vendor_id', get_current_user_id() );
+
+									$product_shipping_class = get_terms( 'product_shipping_class', array('hide_empty' => 0));
+									$shipping_classes = apply_filters( 'wcfm_product_shipping_class', $product_shipping_class );
+									$shipping_option_array = array('_no_shipping_class' => __('No shipping class', 'wc-frontend-manager'));
+									if( $product_shipping_class && !empty( $product_shipping_class ) ) {
+										foreach($product_shipping_class as $product_shipping) {
+											$variation_shipping_option_array[$product_shipping->term_id] = $product_shipping->name;
+											$shipping_option_array[$product_shipping->term_id] = $product_shipping->name;
+										}
+									}
+									if( !empty( $shipping_option_array ) ) {
+										foreach ($shipping_option_array as $key => $shipping_class_name ) { ?>
+											<option 
+											value="<?php echo $key; ?>"
+											selected="<?php echo $key == $selected_shipping_class ? 'selected' : ''; ?>"
+											>
+												<?php echo $shipping_class_name; ?>
+											</option>
+											<?php
+										}
+									}
+									?>
+								</select>
+							</div>
+							<div class="wrapper_shipping_classes_options" id="shipping_classes_options">
+								<label>
+									<?php _e("Preço", 'wc-multivendor-marketplace'); ?>
+								</label>
+								<input 
+									type="text" 
+									class="wcfm-text wcfm_ele shipping_classes_price" 
+									name="shipping_classes_price" 
+									id="shipping_classes_price" 
+									placeholder="<?php _e('Preço', 'wc-multivendor-marketplace'); ?>" 
+									value=""
+								/>
+							</div>
+							<div class="shipping_class_action_buttons" id="shipping_class_action_buttons">
+								<button class="wcfm_btn wcfm_btn-theme wcfm_btn-add-shpping-class" id="add_shipping_class">
+									<span>
+										<i class="wcfmfa fa-plus"></i>
+									</span>
+								</button>
+								<button class="wcfm_btn wcfm_btn-theme wcfm_btn-remove-shipping-class" id="remove_shipping_class">
+									<span>
+										<i class="wcfmfa fa-minus"></i>
+									</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
         
         <?php do_action( 'wcfmmp_shipping_method_edit_popup_end' ); ?>
         

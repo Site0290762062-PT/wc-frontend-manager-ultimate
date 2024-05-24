@@ -941,7 +941,8 @@ if(!function_exists('wcfmmp_get_shipping_methods')) {
 																														''  => __('-- Select a Method --', 'wc-multivendor-marketplace'),
 																														'flat_rate' => __('Flat Rate', 'wc-multivendor-marketplace'),
 																														'local_pickup' => __('Local Pickup', 'wc-multivendor-marketplace'),
-																														'free_shipping' => __('Free Shipping', 'wc-multivendor-marketplace')
+																														'free_shipping' => __('Free Shipping', 'wc-multivendor-marketplace'),
+																														'weight-class-shipping' => __('Envio por Peso/Classe de Envio', 'wc-multivendor-marketplace')
 																													) ) );
   }
 }

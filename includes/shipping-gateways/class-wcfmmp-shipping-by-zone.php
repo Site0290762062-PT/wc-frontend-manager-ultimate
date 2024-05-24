@@ -255,6 +255,8 @@ class WCFMmp_Shipping_By_Zone extends WC_Shipping_Method {
 				continue;
 			}
 
+            //var_dump($method['id']);
+
 			if ( $method['id'] == 'flat_rate' ) {
 				$setting_cost = isset( $method['settings']['cost'] ) ? stripslashes_deep( $method['settings']['cost'] ) : '';
 				
@@ -308,7 +310,17 @@ class WCFMmp_Shipping_By_Zone extends WC_Shipping_Method {
 					}
 				}
 
-			} elseif ( 'free_shipping' == $method['id'] ) {
+			} elseif( 'weight-class-shipping' == $method['id'] ) {
+
+                $products = $package['contents'];
+                $costs = $method['settings']['cost'];
+                $weight_costs = $costs['weight'];
+                $shipping_class_rules = $costs['shipping_class'];
+                $weight_per_seller = $this->calculate_weight_shipping_class_per_seller( $products, $weight_costs, $shipping_class_rules );
+                $has_costs = true;
+                $cost = ($weight_per_seller !== null && $weight_per_seller > 0) ? $weight_per_seller : 0;
+
+            }elseif ( 'free_shipping' == $method['id'] ) {
 				$is_available = self::free_shipping_is_available( $package, $method );
 
 				if ( $is_available ) {
@@ -341,7 +353,7 @@ class WCFMmp_Shipping_By_Zone extends WC_Shipping_Method {
 					'default'     => 'off'
 			);
 		}
-		
+        //exit;
 		//print_r($rates); die;
 
 		// send shipping rates to WooCommerce
@@ -378,6 +390,56 @@ class WCFMmp_Shipping_By_Zone extends WC_Shipping_Method {
   	  return true;
   	}, 999 );
   	return $this->is_available( $package );
+  }
+
+  private function calculate_weight_shipping_class_per_seller( $products, $weight_rules, $shipping_class_rules ){
+    $seller_products = [];
+    foreach( $products as $product ) {
+        $vendor_id = get_post_field('post_author', $product['product_id']);
+        $seller_products[$vendor_id][] = $product;
+    }
+
+    if( empty( $seller_products ) ) {
+        return false;
+    }
+
+    foreach( $seller_products as $vendor_id => $products ) {
+        if(!self::is_shipping_enabled_for_seller( $vendor_id )) {
+            continue;
+        }
+
+        $total_weight = 0;
+        $on_cart_shipping_classes = [];
+        foreach( $products as $product ) {
+            if ($product['data']->has_weight()){
+                $total_weight += ($product['data']->get_weight() * $product['quantity']);
+            }
+            $shipping_class = $product['data']->get_shipping_class_id();
+            if( !empty( $shipping_class ) ) {
+                $on_cart_shipping_classes[] = $product['data']->get_shipping_class_id();
+            }
+        }
+
+        $total_price = 0;
+        foreach($weight_rules as $rule) {
+            $min_weight = $rule['min_weight'];
+            $max_weight = $rule['max_weight'];
+            $price = $rule['price'];
+            if( $total_weight >= $min_weight && ($total_weight <= $max_weight || empty($max_weight)) ) {
+                $total_price = (float) $price;
+                break;
+            }
+        }
+
+        foreach($shipping_class_rules as $rule) {
+            $shipping_class = $rule['class'];
+            $price = $rule['price'];
+            if( in_array( $shipping_class, $on_cart_shipping_classes ) ) {
+                $total_price += (float) $price;
+            }
+        }
+        return $total_price;
+    }
   }
 
 
